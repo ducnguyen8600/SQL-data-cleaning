@@ -1,7 +1,7 @@
 # SQL-data-cleaning
 This is an educational project on data cleaning and preparation using SQL. The original database in CSV format is located in the file club_member_info.csv. Here, we will explore the steps that need to be applied to obtain a cleansed version of the dataset.
 
-Let's inspect the initial rows to analyze the data in its original format.
+## Inspect data
 ```sql
 SELECT *
 FROM club_member_info
@@ -20,7 +20,7 @@ LIMIT 10
 |mendie alexandrescu|46|single|malexandrescu8@state.gov|504-918-4753|34 Delladonna Terrace,New Orleans,Louisiana|Systems Administrator III|3/12/1921|
 | fey kloss|52|married|fkloss9@godaddy.com|808-177-0318|8976 Jackson Park,Honolulu,Hawaii|Chemical Engineer|11/5/2014|
 
-### Create a new table for cleaning
+## Create a new table for cleaning
 ```sql
 CREATE TABLE club_member_info_cleaned (
 	full_name VARCHAR(50),
@@ -33,9 +33,37 @@ CREATE TABLE club_member_info_cleaned (
 	membership_date NVARCHAR(50)
 );
 ```
-### Copy all values from original table
+## Copy all values from original table
 ```sql
 INSERT INTO club_member_info_cleaned 
 SELECT * FROM club_member_info;
 ```
+## Clean data
+
+### Update column full_name
+
+#### Update full_name to uppercase and eliminate spaces
+```sql
+UPDATE club_member_info_cleaned
+SET full_name = TRIM(UPPER(full_name))
+```
+#### Update full_name from empty value to NULL
+```sql
+UPDATE club_member_info_cleaned
+SET full_name = 
+	(CASE 
+		WHEN full_name = '' THEN NULL 
+		ELSE full_name 
+	END)
+```
+
+### Update column age
+
+#### Update age out of range and empty to NULL
+```sql
+UPDATE club_member_info_cleaned
+SET age = NULL
+WHERE age < 18 or age > 100 or age IS NULL
+```
+
 
