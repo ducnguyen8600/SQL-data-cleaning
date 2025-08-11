@@ -56,11 +56,40 @@ WHERE full_name = ''
 
 ### Update column age
 
+##### Inspect data
+```sql
+SELECT age
+FROM club_member_info_cleaned
+WHERE age < 18 or age > 100
+```
+
+|age|
+|---|
+|399|
+|555|
+|544|
+|499|
+|522|
+||
+|277|
+||
+|288|
+|588|
+|599|
+|677|
+|322|
+|644|
+||
+|411|
+|633|
+|222|
+
+
 ##### Convert age out of range (18-100) and empty to NULL
 ```sql
 UPDATE club_member_info_cleaned
 SET age = NULL
-WHERE age < 18 or age > 100 or age IS NULL
+WHERE age < 18 or age > 100
 ```
 ### Update column martial_status
 
