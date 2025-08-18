@@ -223,3 +223,54 @@ UPDATE club_member_info_cleaned
 SET membership_date = NULL
 WHERE CAST(SUBSTR(membership_date,-4)as int) >= 2025 or CAST(SUBSTR(membership_date,-4)as int) <2000
 ```
+## Remove duplicate data
+
+### Inspect duplicate data
+
+```sql
+SELECT *, COUNT(full_name) as count
+FROM club_member_info_cleaned
+GROUP BY full_name
+HAVING count >1
+```
+|full_name|age|martial_status|email|phone|full_address|job_title|membership_date|count|
+|---------|---|--------------|-----|-----|------------|---------|---------------|-----|
+|ERWIN HUXTER|25|single|ehuxterm0@marketwatch.com|704-295-3261|0 Homewood Road,Charlotte,North Carolina|Software Test Engineer III|9/29/2017|3|
+|GARRICK REGLAR|66|divorced|greglar4r@answers.com|214-314-5437|6 Dottie Drive,Dallas,Texas|Safety Technician I|11/22/2015|2|
+|GEORGES PREWETT|47|married|gprewettfl@mac.com|571-157-7766|76 Graedel Road,Alexandria,Virginia|Paralegal|10/5/2015|2|
+|HASKELL BRADEN||divorced|hbradenri@freewebs.com|510-963-9848|35005 Waubesa Crossing,Berkeley,California|Dental Hygienist|11/4/2015|2|
+|MADDIE MORRALLEE|39|married|mmorralleemj@wordpress.com|712-853-2968|9339 Straubel Center,Sioux City,Iowa|Software Engineer II|1/29/2020|2|
+|NICKI FILLISKIRK|66|married|nfilliskirkd5@newsvine.com|410-848-2272|7657 Alpine Plaza,Baltimore,Maryland|Geologist IV|6/18/2021|2|
+|OBED MACCAUGHEN|27|divorced|omaccaughen1o@naver.com|815-990-8611|7069 Valley Edge Alley,Joliet,Illinois|Junior Executive|1/27/2012|2|
+|SEYMOUR LAMBLE|27|married|slamble81@amazon.co.uk|979-346-7243|90691 Veith Place,Bryan,Texas|Budget/Accounting Analyst IV|12/26/2017|2|
+|TAMQRAH DUNKERSLEY|36|single|tdunkersley8u@dedecms.com|651-939-2423|0 Colorado Terrace,Saint Paul,Minnesota|VP Sales|6/27/2016|2|
+
+### Duplictae data
+```sql
+SELECT * FROM (SELECT *, ROW_NUMBER() OVER(PARTITION BY full_name) as rn
+FROM club_member_info_cleaned) as t
+WHERE rn >1
+```
+ROW_NUMBER giúp đánh số các hàng duplicate. Các hàng chính không phải duplicate thì ROW_NUMBER sẽ trả rn = 1.
+Các hàng duplicate thì ROW_NUMBER sẽ trả rn > 1.
+
+|full_name|age|martial_status|email|phone|full_address|job_title|membership_date|rn|
+|---------|---|--------------|-----|-----|------------|---------|---------------|--|
+|ERWIN HUXTER|25|married|ehuxterm0@marketwatch.com|704-295-3261|0 Homewood Road,Charlotte,North Carolina|Software Test Engineer III|9/29/2017|2|
+|ERWIN HUXTER|25|married|ehuxterm0@marketwatch.com|704-295-3261|0 Homewood Road,Charlotte,North Carolina|Software Test Engineer III|9/29/2017|3|
+|GARRICK REGLAR|66|single|greglar4r@answers.com|214-314-5437|6 Dottie Drive,Dallas,Texas|Safety Technician I|11/22/2015|2|
+|GEORGES PREWETT|47|single|gprewettfl@mac.com|571-157-7766|76 Graedel Road,Alexandria,Virginia|Paralegal|10/5/2015|2|
+|HASKELL BRADEN|32|divorced|hbradenri@freewebs.com|510-963-9848|35005 Waubesa Crossing,Berkeley,California|Dental Hygienist|11/4/2015|2|
+|MADDIE MORRALLEE|39|divorced|mmorralleemj@wordpress.com|712-853-2968|9339 Straubel Center,Sioux City,Iowa|Software Engineer II|1/29/2020|2|
+|NICKI FILLISKIRK|66|married|nfilliskirkd5@newsvine.com|410-848-2272|7657 Alpine Plaza,Baltimore,Maryland|Geologist IV|6/18/2021|2|
+|OBED MACCAUGHEN|27|married|omaccaughen1o@naver.com|815-990-8611|7069 Valley Edge Alley,Joliet,Illinois|Junior Executive|1/27/2012|2|
+|SEYMOUR LAMBLE|27|single|slamble81@amazon.co.uk|979-346-7243|90691 Veith Place,Bryan,Texas|Budget/Accounting Analyst IV|12/26/2017|2|
+|TAMQRAH DUNKERSLEY|36|single|tdunkersley8u@dedecms.com|651-939-2423|0 Colorado Terrace,Saint Paul,Minnesota|VP Sales|6/27/2016|2|
+
+### Delete duplicate data
+```sql
+DELETE FROM club_member_info_cleaned
+WHERE full_name IN (SELECT full_name FROM (SELECT *, ROW_NUMBER() OVER(PARTITION BY full_name) as rn
+FROM club_member_info_cleaned) as t
+WHERE rn >1)
+```
