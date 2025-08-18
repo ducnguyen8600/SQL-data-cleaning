@@ -216,7 +216,7 @@ WHERE y >= 2025 or y < 2000
 |61|1915|
 |38|1915|
 
-Year in membership date is wrong because it's smaller than 192x
+Year in membership date is wrong because it's all smaller than 192x
 ##### Convert wrong memembership_date to NULL
 ```sql
 UPDATE club_member_info_cleaned
